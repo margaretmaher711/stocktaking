@@ -40,6 +40,7 @@ class NewDocumentScreen extends StatelessWidget {
                       hintTxt: '',
                       textController: barcodeController,
                       validator: (String? str) {},
+                      onFieldSubmitted: (String? str) {},
                     ),
                   )
                 ],
@@ -57,6 +58,7 @@ class NewDocumentScreen extends StatelessWidget {
                       hintTxt: '',
                       textController: barcodeController,
                       validator: (String? str) {},
+                      onFieldSubmitted: (String? str) {},
                     ),
                   )
                 ],

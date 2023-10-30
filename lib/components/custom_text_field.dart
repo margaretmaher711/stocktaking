@@ -5,6 +5,7 @@ class CustomTextField extends StatelessWidget {
   // TextInputType txtInputType;
   TextEditingController textController;
   final String? Function(String?)? validator;
+  final String? Function(String?)? onFieldSubmitted;
   // final int? maxLength;
   // final bool? enabled;
   // bool float;
@@ -20,6 +21,7 @@ class CustomTextField extends StatelessWidget {
         // required this.maxLength,
         // required this.enabled,
         required this.validator,
+        required this.onFieldSubmitted,
         // required this.hintTxtDirc,
         // this.float = true
       })
@@ -36,7 +38,7 @@ class CustomTextField extends StatelessWidget {
               fontSize: 18,
             ),
             controller: textController,
-            textDirection: TextDirection.ltr,
+            textDirection: TextDirection.ltr,onFieldSubmitted:onFieldSubmitted ,
             // keyboardType: txtInputType,
             // maxLength: maxLength,
             // enabled: enabled,
