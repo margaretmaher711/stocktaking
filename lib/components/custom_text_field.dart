@@ -17,6 +17,7 @@ class CustomTextField extends StatelessWidget {
         required this.labelTxt,
         required this.hintTxt,
         required this.textController,
+         // this.initialValue='',
         // required this.txtInputType,
         // required this.maxLength,
         // required this.enabled,
@@ -32,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     return Container(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 6),
         child: TextFormField(
+            // initialValue:initialValue,
             cursorColor: const Color(0xff03314B),
             style: const TextStyle(
               color: Colors.black,
@@ -48,7 +50,7 @@ class CustomTextField extends StatelessWidget {
                 counterText: "",
                 fillColor: Colors.transparent,
                 filled: true,
-                contentPadding: const EdgeInsets.fromLTRB(8, 30, 10, 5),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                 labelText: labelTxt,
                 labelStyle: const TextStyle(
                     fontFamily: 'Cairo-Light',
@@ -61,7 +63,6 @@ class CustomTextField extends StatelessWidget {
                 //     ? FloatingLabelBehavior.always
                 //     : FloatingLabelBehavior.never,
                 hintStyle: const TextStyle(
-                    fontFamily: 'Cairo-Light',
                     color: Color(0xff03314B),
                     fontSize: 18,
                     fontWeight: FontWeight.w400),

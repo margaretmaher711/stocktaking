@@ -1,14 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:stocktaking/components/custom_text_field.dart';
 import 'package:stocktaking/components/item_in_document_component.dart';
 
-class NewDocumentScreen extends StatelessWidget {
+import '../database/database_helper.dart';
+
+class NewDocumentScreen extends StatefulWidget {
   NewDocumentScreen({super.key});
 
-  TextEditingController barcodeController = TextEditingController();
-  TextEditingController quantityController = TextEditingController();
-  List documentItems = [ItemInDocument(itemName: 'itemName', itemQuantity: 5)];
+  @override
+  State<NewDocumentScreen> createState() => _NewDocumentScreenState();
+}
 
+class _NewDocumentScreenState extends State<NewDocumentScreen> {
+  TextEditingController barcodeController = TextEditingController();
+
+  TextEditingController quantityController = TextEditingController();
+
+  List documentItems = [];
+
+  final snackBar = SnackBar(
+    content: Text('Sorry! there is no item with this barcode.'),
+    backgroundColor: Colors.red,
+  );
+  DatabaseHelper dbHelper = DatabaseHelper();
+Map itemData={};
+int initialValue=0;
+  void getItemByBarcode(String barcode) async {
+
+
+    Database? db = await dbHelper.database;
+
+    List<Map<String, dynamic>> result = await db!.query(
+      'items',
+      columns: ['item_name', 'item_price', 'item_quantity'],
+      where: 'item_barcode = ?',
+      whereArgs: [barcode],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      itemData = result.first;
+      documentItems.add(ItemInDocument(itemName: itemData['item_name'], itemQuantity: itemData['item_quantity']));
+      barcodeController.text='';
+      quantityController.text='1';
+      print('result.first${result.first['item_name']}');
+    } else {
+      itemData={};
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      print('null');
+    }
+    setState(() {});
+  }
+insertToRecordsTable() async {
+      int lastDocumentNumber = await dbHelper.getLastDocumentNumber();
+    DateTime currentDateTime = await dbHelper.getCurrentDateTime();
+
+    Map<String, dynamic> newStockRecord = {
+      DatabaseHelper.recordDocNo: lastDocumentNumber,
+      DatabaseHelper.recordTime: currentDateTime.toString(),
+      DatabaseHelper.recordItemId: 'item123',
+      DatabaseHelper.recordItemQuantity: 5,
+    };
+    print('newStockRecord: $newStockRecord');
+    int insertedStockRecordId =
+    await dbHelper.insertStockRecord(newStockRecord);
+    print('Stock record inserted. Record ID: $insertedStockRecordId');
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +100,9 @@ class NewDocumentScreen extends StatelessWidget {
                       hintTxt: '',
                       textController: barcodeController,
                       validator: (String? str) {},
-                      onFieldSubmitted: (String? str) {},
+                      onFieldSubmitted: (String? str) {
+
+                      },
                     ),
                   )
                 ],
@@ -56,7 +118,7 @@ class NewDocumentScreen extends StatelessWidget {
                     child: CustomTextField(
                       labelTxt: '',
                       hintTxt: '',
-                      textController: barcodeController,
+                      textController: quantityController,
                       validator: (String? str) {},
                       onFieldSubmitted: (String? str) {},
                     ),
@@ -73,7 +135,9 @@ class NewDocumentScreen extends StatelessWidget {
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 backgroundColor: Theme.of(context).colorScheme.primary,
               ),
-              onPressed: () {},
+              onPressed: () {
+                getItemByBarcode(barcodeController.text);
+              },
               child: const Text('Add')),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
