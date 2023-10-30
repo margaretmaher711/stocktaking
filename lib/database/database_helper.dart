@@ -5,18 +5,19 @@ class DatabaseHelper {
   static Database? _database;
 
   static const String itemsTable = 'items';
-  static const String stockRecordsTable = 'stock_records';
+  static const String recordsTable = 'stock_records';
 
-  static const String columnItemId = 'item_id';
-  static const String columnItemName = 'item_name';
-  static const String columnItemBarcode = 'item_barcode';
-  static const String columnItemPrice = 'item_price';
-  static const String columnItemQuantity = 'item_quantity';
+  static const String itemId = 'item_id';
+  static const String itemName = 'item_name';
+  static const String itemBarcode = 'item_barcode';
+  static const String itemPrice = 'item_price';
+  static const String itemQuantity = 'item_quantity';
 
-  static const String columnRecordDocNo = 'record_doc_no';
-  static const String columnRecordTime = 'record_time';
-  static const String columnRecordItemId = 'record_item_id';
-  static const String columnRecordItemQuantity = 'record_item_quantity';
+  static const String recordDocNo = 'record_doc_no';
+  static const String recordTime = 'record_time';
+  static const String recordItemId = 'record_item_id';
+
+  static const String recordItemQuantity = 'record_item_quantity';
 
   Future<Database?> get database async {
     if (_database != null) {
@@ -37,27 +38,30 @@ class DatabaseHelper {
   }
 
   _onCreate(Database db, int version) async {
-    await db.execute('''
-          CREATE TABLE $itemsTable (
-            $columnItemId TEXT PRIMARY KEY,
-            $columnItemName TEXT NOT NULL,
-            $columnItemBarcode TEXT UNIQUE,
-            $columnItemPrice REAL,
-            $columnItemQuantity INTEGER NOT NULL
-          )
-        ''');
+
 
     await db.execute('''
-          CREATE TABLE $stockRecordsTable (
-            $columnRecordDocNo INTEGER AUTOINCREMENT,
-            $columnRecordTime TEXT,
-            $columnRecordItemId TEXT,
-            $columnRecordItemQuantity INTEGER,
-            FOREIGN KEY ($columnRecordItemId)
-              REFERENCES $itemsTable ($columnItemId)
-          )
-        ''');
-    print('onCreate===================');
+      CREATE TABLE $itemsTable (
+        $itemId TEXT NOT NULL PRIMARY KEY, 
+        $itemName TEXT NOT NULL,
+        $itemBarcode TEXT UNIQUE NOT NULL,
+        $itemPrice REAL NOT NULL,
+        $itemQuantity INTEGER NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE $recordsTable (
+        $recordDocNo INTEGER NOT NULL, 
+        $recordTime TEXT NOT NULL,
+        $recordItemId TEXT NOT NULL,
+        $recordItemQuantity INTEGER NOT NULL,
+        PRIMARY KEY ($recordDocNo, $recordTime, $recordItemId),
+        FOREIGN KEY ($recordItemId) REFERENCES items ($itemId)
+      )
+    ''');
+
+    print("onCreate =====================================");
   }
   Future<List<Map<String, dynamic>>> getItems() async {
     Database? db = await database;
@@ -73,8 +77,8 @@ class DatabaseHelper {
   Future<int> getLastDocumentNumber() async {
     Database ?db = await database;
     List<Map<String, dynamic>> result =
-    await db!.rawQuery('SELECT MAX($columnRecordDocNo) FROM $stockRecordsTable');
-    int lastDocumentNumber = result[0]['MAX($columnRecordDocNo)'] ?? 0;
+    await db!.rawQuery('SELECT MAX($recordDocNo) FROM $recordsTable');
+    int lastDocumentNumber = result[0]['MAX($recordDocNo)'] ?? 0;
     return lastDocumentNumber + 1;
   }
 
@@ -84,7 +88,7 @@ class DatabaseHelper {
 
   Future<int> insertStockRecord(Map<String, dynamic> stockRecord) async {
     Database? db = await database;
-    return await db!.insert(stockRecordsTable, stockRecord);
+    return await db!.insert(recordsTable, stockRecord);
   }
 
 
