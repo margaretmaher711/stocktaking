@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:stocktaking/components/custom_text_field.dart';
 import 'package:stocktaking/components/item_in_document_component.dart';
@@ -18,22 +19,26 @@ class _NewDocumentScreenState extends State<NewDocumentScreen> {
   TextEditingController quantityController = TextEditingController();
 
   List documentItems = [];
+  List documentItemsMap = [];
 
-  final snackBar = SnackBar(
-    content: Text('Sorry! there is no item with this barcode.'),
-    backgroundColor: Colors.red,
-  );
+  void showSnackBar(BuildContext context, message, backGroundColor) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: backGroundColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   DatabaseHelper dbHelper = DatabaseHelper();
-Map itemData={};
-int initialValue=0;
+  Map itemData = {};
+  int initialValue = 0;
+
   void getItemByBarcode(String barcode) async {
-
-
     Database? db = await dbHelper.database;
 
     List<Map<String, dynamic>> result = await db!.query(
       'items',
-      columns: ['item_name', 'item_price', 'item_quantity'],
+      columns: ['item_name', 'item_price', 'item_quantity','item_barcode'],
       where: 'item_barcode = ?',
       whereArgs: [barcode],
       limit: 1,
@@ -41,34 +46,69 @@ int initialValue=0;
 
     if (result.isNotEmpty) {
       itemData = result.first;
-      documentItems.add(ItemInDocument(itemName: itemData['item_name'], itemQuantity: itemData['item_quantity']));
-      barcodeController.text='';
-      quantityController.text='1';
-      print('result.first${result.first['item_name']}');
+      print('${itemData['item_barcode']}');
+      // if(itemData['item_barcode']==documentBarcodesItems[0]){
+      //   documentItems[documentItems.indexWhere((element) => element == documentBarcodesItems[0])] = food;
+      //
+      // }
+
+      documentItemsMap[documentItemsMap.indexWhere((element) {
+        return element['documentItemBarcode'] == itemData['item_barcode'];
+      })] =
+          itemData;
+
+      documentItemsMap.add({
+        "documentItemName": itemData['item_name'],
+        "documentItemQuantity": itemData['item_quantity'],
+        "documentItemBarcode": itemData['item_barcode'],
+      });
+      documentItems.add(ItemInDocument(
+          itemName: itemData['item_name'],
+          itemQuantity: itemData['item_quantity']));
+      barcodeController.text = '';
+      quantityController.text = '1';
+      print('result.first${documentItemsMap}');
+      print('result.first${documentItems}');
+      print('result.first${itemData['item_barcode']}');
     } else {
-      itemData={};
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      itemData = {};
+      showSnackBar(
+          context, 'Sorry! there is no item with this barcode.', Colors.red);
 
       print('null');
     }
     setState(() {});
   }
-insertToRecordsTable() async {
-      int lastDocumentNumber = await dbHelper.getLastDocumentNumber();
+
+  insertToRecordsTable() async {
+    int lastDocumentNumber = await dbHelper.getLastDocumentNumber();
     DateTime currentDateTime = await dbHelper.getCurrentDateTime();
 
     Map<String, dynamic> newStockRecord = {
       DatabaseHelper.recordDocNo: lastDocumentNumber,
       DatabaseHelper.recordTime: currentDateTime.toString(),
       DatabaseHelper.recordItemId: 'item123',
-      DatabaseHelper.recordItemQuantity: 5,
+      DatabaseHelper.recordItemQuantity: documentItems.length,
     };
     print('newStockRecord: $newStockRecord');
     int insertedStockRecordId =
-    await dbHelper.insertStockRecord(newStockRecord);
+        await dbHelper.insertStockRecord(newStockRecord);
     print('Stock record inserted. Record ID: $insertedStockRecordId');
-
   }
+
+  Future<int> updateItemQuantity(String itemBarcode, int newQuantity) async {
+    Database? db = await dbHelper.database;
+
+    int rowsAffected = await db!.update(
+      'items',
+      {'item_quantity': newQuantity},
+      where: 'item_barcode = ?',
+      whereArgs: [itemBarcode],
+    );
+    print('rowsAffected$rowsAffected');
+    return rowsAffected;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,9 +140,7 @@ insertToRecordsTable() async {
                       hintTxt: '',
                       textController: barcodeController,
                       validator: (String? str) {},
-                      onFieldSubmitted: (String? str) {
-
-                      },
+                      onFieldSubmitted: (String? str) {},
                     ),
                   )
                 ],
@@ -164,7 +202,16 @@ insertToRecordsTable() async {
                             Theme.of(context).colorScheme.onPrimary,
                         backgroundColor: Theme.of(context).colorScheme.primary,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        insertToRecordsTable();
+                        updateItemQuantity(
+                                '123456789', int.parse(quantityController.text))
+                            .then((value) {
+                          showSnackBar(context, 'Document Saved Successfully.',
+                              Colors.green);
+                          Get.back();
+                        });
+                      },
                       child: const Text('Save')),
                 )
               : Container(),

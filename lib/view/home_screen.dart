@@ -68,26 +68,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            InkWell(
-              onTap: () {
-                Get.to(() => NewDocumentScreen());
-              },
-              child: MainMenuItem(
-                  title: 'New Stocktaking Document', color: Colors.blue),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            InkWell(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              InkWell(
                 onTap: () {
-                  Get.to(() => CheckInventoryScreen());
+                  Get.to(() => NewDocumentScreen());
                 },
-                child:
-                    MainMenuItem(title: 'Check Inventory', color: Colors.red)),
-          ],
+                child: MainMenuItem(
+                    title: 'New Stocktaking Document', color: Colors.blue),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              InkWell(
+                  onTap: () {
+                    Get.to(() => CheckInventoryScreen());
+                  },
+                  child:
+                      MainMenuItem(title: 'Check Inventory', color: Colors.red)),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
