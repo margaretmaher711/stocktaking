@@ -11,6 +11,7 @@ class NewDocumentController extends GetxController {
   final barcodeController = TextEditingController();
   final quantityController = TextEditingController(text: "1");
 
+  //get all item's details searching with barcode
   Future<void> getItemByBarcode(BuildContext context) async {
     final barcode = barcodeController.text;
     final db = await dbHelper.database;
@@ -39,13 +40,14 @@ class NewDocumentController extends GetxController {
     }
   }
 
+//add the item you searched for with barcode to a list
   void addItem(
     String barcode,
     int quantity,
     String name,
   ) {
     bool foundMatch = false;
-
+    //to check if there is any duplicate
     for (var item in documentItems) {
       if (item.barcode == barcode) {
         item.quantity += quantity;
@@ -60,6 +62,7 @@ class NewDocumentController extends GetxController {
     update();
   }
 
+  //insert new document to database
   Future<int> insertToRecordsTable() async {
     lastDocumentNumber = await dbHelper.getLastDocumentNumber();
     final currentDateTime = await dbHelper.getCurrentDateTime();
@@ -74,16 +77,18 @@ class NewDocumentController extends GetxController {
     final insertedStockRecordId =
         await dbHelper.insertStockRecord(newStockRecord);
     lastDocumentNumber = insertedStockRecordId;
-    print('insertedStockRecordId$insertedStockRecordId');
+
     update();
     return lastDocumentNumber;
   }
 
+  //to inform the document's number.
   getLastDocumentNo() async {
     lastDocumentNumber = await dbHelper.getLastDocumentNumber();
     update();
   }
 
+  //to change the quantity of an item in database within any saved documents
   Future<int> updateItemQuantity() async {
     final db = await dbHelper.database;
     int rowsAffected = 0;
@@ -100,6 +105,7 @@ class NewDocumentController extends GetxController {
     return rowsAffected;
   }
 
+//snackbar appears error or successful messages
   void showSnackBar(
       BuildContext context, String message, Color backgroundColor) {
     final snackBar = SnackBar(

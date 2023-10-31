@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../database/database_helper.dart';
 
-class HomeController extends GetxController{
+class HomeController extends GetxController {
   void insertNewItem() async {
     DatabaseHelper dbHelper = DatabaseHelper();
 
@@ -13,11 +13,11 @@ class HomeController extends GetxController{
     // Example usage of database operations
     List<Map<String, dynamic>> items = await dbHelper.getItems();
 
-
+  //can change item's data manual from here
     Map<String, dynamic> newItem = {
-      DatabaseHelper.itemId: 'item123',
-      DatabaseHelper.itemName: 'Example Item',
-      DatabaseHelper.itemBarcode: '123456789',
+      DatabaseHelper.itemId: 'item12',
+      DatabaseHelper.itemName: 'Example Item2',
+      DatabaseHelper.itemBarcode: '12345678',
       DatabaseHelper.itemPrice: 9.99,
       DatabaseHelper.itemQuantity: 10,
     };
@@ -36,22 +36,6 @@ class HomeController extends GetxController{
         print('Item insertion failed: $e');
       }
     }
-
-    // int lastDocumentNumber = await dbHelper.getLastDocumentNumber();
-    // DateTime currentDateTime = await dbHelper.getCurrentDateTime();
-    //
-    // Map<String, dynamic> newStockRecord = {
-    //   DatabaseHelper.recordDocNo: lastDocumentNumber,
-    //   DatabaseHelper.recordTime: currentDateTime.toString(),
-    //   DatabaseHelper.recordItemId: 'item123',
-    //   DatabaseHelper.recordItemQuantity: 5,
-    // };
-    // print('newStockRecord: $newStockRecord');
-    // int insertedStockRecordId =
-    // await dbHelper.insertStockRecord(newStockRecord);
-    // print('Stock record inserted. Record ID: $insertedStockRecordId');
-    // var ktkt = await dbHelper.getLastDocumentNumber();
-    // print('ktkt${ktkt}');
     update();
   }
 }

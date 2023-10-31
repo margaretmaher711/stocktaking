@@ -12,6 +12,7 @@ class CheckInventoryController extends GetxController{
     backgroundColor: Colors.red,
   );
 
+  //we can search for any item to get its details
   void getItemByBarcode(context) async {
     DatabaseHelper dbHelper = DatabaseHelper();
 
